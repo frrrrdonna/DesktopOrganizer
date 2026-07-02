@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+**/bin/
+**/obj/
+
+# Publish and packages
+publish/
+
+# Local backups
+backups/
+
+# Internal agent notes
+AGENT.md
+
+# Windows
+Thumbs.db
+Desktop.ini

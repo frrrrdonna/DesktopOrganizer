@@ -1,0 +1,182 @@
+<UserControl
+    x:Class="DesktopOrganizer.App.Views.FenceGroupView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewModels="clr-namespace:DesktopOrganizer.App.ViewModels"
+    mc:Ignorable="d"
+    d:DataContext="{d:DesignInstance Type=viewModels:FenceGroupViewModel}">
+
+    <UserControl.Resources>
+        <Style x:Key="ViewModeVisible" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="EditModeVisible" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CollapsedHidden" TargetType="FrameworkElement">
+            <Setter Property="Visibility" Value="Visible" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCollapsed}" Value="True">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Border
+        x:Name="GroupBorder"
+        Padding="12"
+        MinWidth="280"
+        MinHeight="120"
+        Background="#F3F4F6"
+        BorderBrush="#D1D5DB"
+        BorderThickness="1"
+        CornerRadius="12"
+        AllowDrop="True"
+        DragEnter="OnDragEnter"
+        DragLeave="OnDragLeave"
+        Drop="OnDrop">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel
+                    Orientation="Horizontal"
+                    Style="{StaticResource ViewModeVisible}">
+                    <TextBlock
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        Text="{Binding Name}" />
+                    <TextBlock
+                        Margin="6,3,0,0"
+                        FontSize="13"
+                        Foreground="#9CA3AF"
+                        Text="{Binding Items.Count, StringFormat='({0})'}" />
+                </StackPanel>
+
+                <TextBox
+                    x:Name="RenameTextBox"
+                    FontSize="18"
+                    FontWeight="SemiBold"
+                    Style="{StaticResource EditModeVisible}"
+                    LostFocus="OnRenameTextBoxLostFocus"
+                    Text="{Binding EditName, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding CommitRenameCommand}" />
+                        <KeyBinding Key="Escape" Command="{Binding CancelRenameCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button
+                        MinWidth="54"
+                        Height="28"
+                        Margin="0,0,4,0"
+                        ToolTip="Save name"
+                        Style="{StaticResource EditModeVisible}"
+                        Command="{Binding CommitRenameCommand}">
+                        <TextBlock Text="Save" FontSize="12" />
+                    </Button>
+                    <Button
+                        MinWidth="58"
+                        Height="28"
+                        Margin="0,0,4,0"
+                        ToolTip="Cancel rename"
+                        Style="{StaticResource EditModeVisible}"
+                        Command="{Binding CancelRenameCommand}">
+                        <TextBlock Text="Cancel" FontSize="12" />
+                    </Button>
+
+                    <Button
+                        MinWidth="52"
+                        Height="28"
+                        Margin="0,0,4,0"
+                        ToolTip="Rename group"
+                        Style="{StaticResource ViewModeVisible}"
+                        Command="{Binding BeginRenameCommand}">
+                        <TextBlock Text="Edit" FontSize="12" />
+                    </Button>
+                    <Button
+                        MinWidth="56"
+                        Height="28"
+                        Margin="0,0,4,0"
+                        ToolTip="Toggle collapse"
+                        Command="{Binding ToggleCollapseCommand}">
+                        <TextBlock Text="Toggle" FontSize="12" />
+                    </Button>
+                    <Button
+                        MinWidth="60"
+                        Height="28"
+                        ToolTip="Remove group"
+                        Command="{Binding RemoveCommand}">
+                        <TextBlock Text="Delete" FontSize="12" Foreground="#EF4444" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <ItemsControl
+                Grid.Row="1"
+                Margin="0,12,0,0"
+                Style="{StaticResource CollapsedHidden}"
+                ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="8"
+                            Background="White"
+                            CornerRadius="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{Binding DisplayName}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                    <Button
+                                        MinWidth="50"
+                                        Height="24"
+                                        Margin="0,0,2,0"
+                                        ToolTip="Open"
+                                        Command="{Binding OpenCommand}">
+                                        <TextBlock Text="Open" FontSize="10" />
+                                    </Button>
+                                    <Button
+                                        MinWidth="58"
+                                        Height="24"
+                                        ToolTip="Remove item"
+                                        Command="{Binding RemoveCommand}">
+                                        <TextBlock Text="Remove" FontSize="10" Foreground="#EF4444" />
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Border>
+</UserControl>
