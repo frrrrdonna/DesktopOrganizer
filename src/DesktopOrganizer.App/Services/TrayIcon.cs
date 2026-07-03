@@ -10,6 +10,7 @@ public sealed class TrayIcon : IDisposable
 {
     private const int WmTrayCallback = 0x0400;
     private const uint NimAdd = 0x00000000;
+    private const uint NimModify = 0x00000001;
     private const uint NimDelete = 0x00000002;
     private const uint NifMessage = 0x00000001;
     private const uint NifIcon = 0x00000002;
@@ -20,10 +21,12 @@ public sealed class TrayIcon : IDisposable
 
     private readonly HwndSource _hwndSource;
     private readonly ContextMenu _contextMenu;
+    private string _tooltip;
     private bool _disposed;
 
-    public TrayIcon(UIElement? contextMenuTarget = null)
+    public TrayIcon(string tooltip = "Desktop Organizer", UIElement? contextMenuTarget = null)
     {
+        _tooltip = tooltip;
         _contextMenu = new ContextMenu { PlacementTarget = contextMenuTarget, Placement = PlacementMode.MousePoint };
         _hwndSource = CreateMessageWindow();
         AddIcon();
@@ -40,6 +43,18 @@ public sealed class TrayIcon : IDisposable
     public void AddSeparator()
     {
         _contextMenu.Items.Add(new Separator());
+    }
+
+    public void ClearAllItems()
+    {
+        _contextMenu.Items.Clear();
+    }
+
+    public void UpdateTooltip(string text)
+    {
+        _tooltip = text;
+        var data = CreateNotifyIconData(NimModify);
+        Shell_NotifyIcon(NimModify, ref data);
     }
 
     public void Dispose()
@@ -109,7 +124,7 @@ public sealed class TrayIcon : IDisposable
             uFlags = NifMessage | NifIcon | NifTip,
             uCallbackMessage = WmTrayCallback,
             hIcon = iconHandle,
-            szTip = "Desktop Organizer",
+            szTip = _tooltip,
         };
     }
 

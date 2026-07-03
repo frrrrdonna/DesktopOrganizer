@@ -170,3 +170,36 @@ Add an explicit shutdown bypass:
 ### Lesson
 
 Any tray-based exit path must bypass close-to-tray interception explicitly, otherwise cleanup code like desktop-state restore may never run.
+
+---
+
+## #7 - Host UI did not refresh immediately after language switching
+
+**Version:** v0.3.4  
+**Found:** 2026-07-03  
+**Severity:** Medium
+
+### Symptom
+
+After changing the language in `Settings`, the settings window updated, but the host window status text, toolbar labels, tray menu items, and tray tooltip stayed in the old language until the application restarted.
+
+### Root Cause
+
+The saved language preference updated `LocalizationService`, but the desktop host UI kept previously evaluated strings.
+`DesktopHostViewModel.StatusText` was not recomputed on localization changes, and the tray menu / tooltip were created once at startup and never rebuilt.
+
+### Solution
+
+1. `DesktopHostViewModel` now subscribes to `LocalizationService.Instance.PropertyChanged` and refreshes `StatusText` in-place.
+2. `App.xaml.cs` now rebuilds the tray menu and tooltip whenever the language changes.
+3. `TrayIcon` gained `ClearAllItems()` and `UpdateTooltip()` so the existing tray icon instance can be refreshed without recreating the entire tray window.
+
+### Key Files
+
+- `src/DesktopOrganizer.App/ViewModels/DesktopHostViewModel.cs`
+- `src/DesktopOrganizer.App/App.xaml.cs`
+- `src/DesktopOrganizer.App/Services/TrayIcon.cs`
+
+### Lesson
+
+When localized UI text is cached outside direct XAML bindings, language switching must trigger an explicit refresh path for every cached surface.

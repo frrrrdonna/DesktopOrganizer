@@ -23,6 +23,9 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
     private int _rightCount;
     private int _topCount;
     private int _bottomCount;
+    private int _lastItemCount;
+    private int _lastBasketCount;
+    private bool _isReady;
     private CancellationTokenSource? _saveDebounceCts;
 
     [ObservableProperty]
@@ -43,6 +46,8 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
         _openSettings = openSettings;
         _hostStateStore = hostStateStore;
         HostState = new DesktopHostState { Settings = settingsViewModel.Settings };
+
+        LocalizationService.Instance.PropertyChanged += (_, _) => RefreshStatusText();
     }
 
     public SettingsViewModel Settings { get; }
@@ -55,9 +60,13 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
 
     public async Task InitializeAsync(CancellationToken cancellationToken = default)
     {
-        StatusText = LocalizationService.Get("Host.Status.Scanning");
+        _isReady = false;
+        RefreshStatusText();
         var items = await _desktopScanner.ScanAsync(cancellationToken);
         var baskets = _desktopClassifier.Classify(items);
+
+        _lastItemCount = items.Count;
+        _lastBasketCount = baskets.Count;
 
         AllBaskets.Clear();
         _leftCount = 0;
@@ -76,9 +85,8 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
 
             if (saved is not null)
             {
-                // Restore saved layout, clamped to current screen bounds
-                vm.X = ClampX(saved.X, screenW);
-                vm.Y = ClampY(saved.Y, screenH);
+                vm.X = CoordinateClamper.ClampX(saved.X, screenW);
+                vm.Y = CoordinateClamper.ClampY(saved.Y, screenH);
                 vm.SnapEdge = saved.SnapEdge;
                 vm.IsCollapsed = saved.IsCollapsed;
             }
@@ -97,7 +105,8 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
         // Persist initial state (ensures new baskets are saved)
         await SaveHostStateAsync();
 
-        StatusText = LocalizationService.Format("Host.Status.Ready", items.Count, baskets.Count);
+        _isReady = true;
+        RefreshStatusText();
     }
 
     public async Task SaveHostStateAsync()
@@ -194,15 +203,15 @@ public sealed partial class DesktopHostViewModel : BaseViewModel
         await _launcher.LaunchAsync(path);
     }
 
-    private static double ClampX(double x, double screenW)
+    private void RefreshStatusText()
     {
-        var maxX = screenW - 72;
-        return Math.Max(0, Math.Min(x, maxX));
-    }
-
-    private static double ClampY(double y, double screenH)
-    {
-        var maxY = screenH - 40;
-        return Math.Max(0, Math.Min(y, maxY));
+        if (_isReady)
+        {
+            StatusText = LocalizationService.Format("Host.Status.Ready", _lastItemCount, _lastBasketCount);
+        }
+        else
+        {
+            StatusText = LocalizationService.Get("Host.Status.Scanning");
+        }
     }
 }

@@ -92,7 +92,24 @@ public partial class App : System.Windows.Application
 
     private void CreateTrayIcon()
     {
-        _trayIcon = new TrayIcon();
+        _trayIcon = new TrayIcon(LocalizationService.Get("Host.Title"));
+        BuildTrayMenu();
+
+        LocalizationService.Instance.PropertyChanged += (_, _) =>
+        {
+            _trayIcon?.ClearAllItems();
+            BuildTrayMenu();
+            _trayIcon?.UpdateTooltip(LocalizationService.Get("Host.Title"));
+        };
+    }
+
+    private void BuildTrayMenu()
+    {
+        if (_trayIcon is null)
+        {
+            return;
+        }
+
         _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Show"), ShowHostWindow, isBold: true);
         _trayIcon.AddSeparator();
         _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Settings"), OpenSettingsWindow);

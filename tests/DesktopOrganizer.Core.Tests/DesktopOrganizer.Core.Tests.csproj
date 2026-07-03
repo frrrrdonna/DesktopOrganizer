@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DesktopOrganizer.Core\DesktopOrganizer.Core.csproj" />
+    <ProjectReference Include="..\..\src\DesktopOrganizer.Infrastructure\DesktopOrganizer.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
