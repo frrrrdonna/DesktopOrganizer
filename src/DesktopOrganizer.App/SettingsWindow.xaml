@@ -1,0 +1,61 @@
+<Window
+    x:Class="DesktopOrganizer.App.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Desktop Organizer Settings"
+    Width="520"
+    Height="360"
+    Background="#F7F3E8"
+    WindowStartupLocation="CenterScreen">
+    <Border Padding="20">
+        <StackPanel>
+            <TextBlock
+                Margin="0,0,0,16"
+                FontSize="24"
+                FontWeight="Bold"
+                Text="Settings" />
+
+            <CheckBox
+                Margin="0,0,0,10"
+                Content="Replace desktop on startup"
+                IsChecked="{Binding ReplaceDesktopOnStartup}" />
+
+            <CheckBox
+                Margin="0,0,0,10"
+                Content="Hide original desktop icons while host is running"
+                IsChecked="{Binding HideDesktopIcons}" />
+
+            <CheckBox
+                Margin="0,0,0,10"
+                Content="Auto-generate baskets from detected desktop content"
+                IsChecked="{Binding AutoGenerateBaskets}" />
+
+            <CheckBox
+                Margin="0,0,0,18"
+                Content="Restore original desktop icon visibility on exit"
+                IsChecked="{Binding RestoreDesktopOnExit}" />
+
+            <CheckBox
+                Margin="0,0,0,18"
+                Content="Physically organize desktop files into managed folders (coming soon)"
+                IsEnabled="False"
+                IsChecked="False" />
+
+            <TextBlock
+                Margin="0,0,0,18"
+                Foreground="#6B5A3C"
+                Text="v0.2.1 adds transparent desktop overlay, floating baskets, and safe exit recovery. Physical desktop-file relocation is intentionally deferred."
+                TextWrapping="Wrap" />
+
+            <Button
+                Width="96"
+                Padding="10,6"
+                HorizontalAlignment="Right"
+                Background="#A88E5E"
+                Foreground="White"
+                BorderThickness="0"
+                Content="Close"
+                Click="OnCloseClicked" />
+        </StackPanel>
+    </Border>
+</Window>

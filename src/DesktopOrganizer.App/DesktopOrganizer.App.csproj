@@ -10,10 +10,10 @@
     <RootNamespace>DesktopOrganizer.App</RootNamespace>
     <Product>Desktop Organizer</Product>
     <Title>Desktop Organizer</Title>
-    <Version>0.1.3</Version>
-    <AssemblyVersion>0.1.3.0</AssemblyVersion>
-    <FileVersion>0.1.3.0</FileVersion>
-    <InformationalVersion>0.1.3-alpha</InformationalVersion>
+    <Version>0.2.1</Version>
+    <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <FileVersion>0.2.1.0</FileVersion>
+    <InformationalVersion>0.2.1-alpha</InformationalVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
