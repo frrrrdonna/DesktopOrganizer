@@ -9,4 +9,6 @@ public sealed class DesktopHostSettings
     public bool AutoGenerateBaskets { get; set; } = true;
 
     public bool RestoreDesktopOnExit { get; set; } = true;
+
+    public string Language { get; set; } = "en-US";
 }

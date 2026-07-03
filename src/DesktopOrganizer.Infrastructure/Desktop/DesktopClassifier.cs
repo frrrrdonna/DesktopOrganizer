@@ -17,11 +17,11 @@ public sealed class DesktopClassifier : IDesktopClassifier
 
     public IReadOnlyList<Basket> Classify(IReadOnlyList<DesktopItem> items)
     {
-        var apps = CreateBasket("Applications", BasketDockEdge.Left);
-        var folders = CreateBasket("Folders", BasketDockEdge.Right);
-        var documents = CreateBasket("Documents", BasketDockEdge.Left);
-        var media = CreateBasket("Media", BasketDockEdge.Bottom);
-        var other = CreateBasket("Other", BasketDockEdge.Right);
+        var apps = CreateBasket("applications", "Applications", BasketDockEdge.Left);
+        var folders = CreateBasket("folders", "Folders", BasketDockEdge.Right);
+        var documents = CreateBasket("documents", "Documents", BasketDockEdge.Left);
+        var media = CreateBasket("media", "Media", BasketDockEdge.Bottom);
+        var other = CreateBasket("other", "Other", BasketDockEdge.Right);
 
         foreach (var item in items)
         {
@@ -33,10 +33,11 @@ public sealed class DesktopClassifier : IDesktopClassifier
             .ToList();
     }
 
-    private static Basket CreateBasket(string name, BasketDockEdge dockEdge)
+    private static Basket CreateBasket(string key, string name, BasketDockEdge dockEdge)
     {
         return new Basket
         {
+            Key = key,
             Name = name,
             DockEdge = dockEdge,
         };

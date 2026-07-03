@@ -10,6 +10,7 @@ public sealed partial class BasketViewModel : BaseViewModel
 {
     private const double SnapDistance = 40;
     private const double PanelHeightEstimate = 400;
+    private const double ExpandedHeight = 400;
 
     [ObservableProperty]
     private bool _isCollapsed;
@@ -23,8 +24,11 @@ public sealed partial class BasketViewModel : BaseViewModel
     [ObservableProperty]
     private BasketDockEdge? _snapEdge;
 
-    public BasketViewModel(Basket model, Func<string, Task>? onOpenItem = null)
+    private readonly Action? _onLayoutChanged;
+
+    public BasketViewModel(Basket model, Func<string, Task>? onOpenItem = null, Action? onLayoutChanged = null)
     {
+        _onLayoutChanged = onLayoutChanged;
         Model = model;
         _isCollapsed = model.IsCollapsed;
         _x = model.X;
@@ -44,17 +48,33 @@ public sealed partial class BasketViewModel : BaseViewModel
 
     public double PanelWidth => IsCollapsed ? 72 : 300;
 
+    public double PanelHeight => IsCollapsed ? double.NaN : ExpandedHeight;
+
     partial void OnIsCollapsedChanged(bool value)
     {
         Model.IsCollapsed = value;
         OnPropertyChanged(nameof(PanelWidth));
+        OnPropertyChanged(nameof(PanelHeight));
+        _onLayoutChanged?.Invoke();
     }
 
-    partial void OnXChanged(double value) => Model.X = value;
+    partial void OnXChanged(double value)
+    {
+        Model.X = value;
+        _onLayoutChanged?.Invoke();
+    }
 
-    partial void OnYChanged(double value) => Model.Y = value;
+    partial void OnYChanged(double value)
+    {
+        Model.Y = value;
+        _onLayoutChanged?.Invoke();
+    }
 
-    partial void OnSnapEdgeChanged(BasketDockEdge? value) => Model.SnapEdge = value;
+    partial void OnSnapEdgeChanged(BasketDockEdge? value)
+    {
+        Model.SnapEdge = value;
+        _onLayoutChanged?.Invoke();
+    }
 
     [RelayCommand]
     private void ToggleCollapse()

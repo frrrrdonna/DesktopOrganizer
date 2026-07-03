@@ -5,6 +5,7 @@ using DesktopOrganizer.App.ViewModels;
 using DesktopOrganizer.Core.Abstractions;
 using DesktopOrganizer.Core.Models;
 using DesktopOrganizer.Infrastructure.Desktop;
+using DesktopOrganizer.Infrastructure.Persistence;
 using DesktopOrganizer.Infrastructure.Shell;
 
 namespace DesktopOrganizer.App;
@@ -13,6 +14,8 @@ public partial class App : System.Windows.Application
 {
     private IDesktopSurfaceController? _desktopSurfaceController;
     private DesktopHostSettings? _desktopHostSettings;
+    private DesktopHostState? _hostState;
+    private IDesktopHostStateStore? _hostStateStore;
     private DesktopSessionSnapshot? _sessionSnapshot;
     private DesktopSessionSnapshotStore? _snapshotStore;
     private SettingsWindow? _settingsWindow;
@@ -20,13 +23,16 @@ public partial class App : System.Windows.Application
     private DesktopHostWindow? _hostWindow;
     private TrayIcon? _trayIcon;
 
-    private static string SnapshotDirectory =>
+    private static string AppDataDirectory =>
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "DesktopOrganizer");
 
     private static string SnapshotPath =>
-        Path.Combine(SnapshotDirectory, "session-snapshot.json");
+        Path.Combine(AppDataDirectory, "session-snapshot.json");
+
+    private static string HostStatePath =>
+        Path.Combine(AppDataDirectory, "desktop-host-state.json");
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -38,18 +44,28 @@ public partial class App : System.Windows.Application
         // desktop icons may still be hidden — restore them.
         await RecoverFromPreviousSessionAsync();
 
+        // Load persisted host state (settings + basket layouts)
+        _hostStateStore = new JsonDesktopHostStateStore(HostStatePath);
+        _hostState = await _hostStateStore.LoadAsync();
+        _desktopHostSettings = _hostState.Settings;
+
+        // Apply saved language preference
+        LocalizationService.SetLanguage(_desktopHostSettings.Language);
+
         var launcher = new ShellLauncher();
         var desktopScanner = new DesktopScanner();
         var desktopClassifier = new DesktopClassifier();
         _desktopSurfaceController = new DesktopSurfaceController();
-        _desktopHostSettings = new DesktopHostSettings();
-        var settingsViewModel = new SettingsViewModel(_desktopHostSettings);
+
+        var settingsViewModel = new SettingsViewModel(_desktopHostSettings, onSettingsChanged: () => _desktopHostViewModel?.DebounceSave());
+
         _desktopHostViewModel = new DesktopHostViewModel(
             desktopScanner,
             desktopClassifier,
             launcher,
             settingsViewModel,
-            OpenSettingsWindow);
+            OpenSettingsWindow,
+            _hostStateStore);
 
         await _desktopHostViewModel.InitializeAsync();
 
@@ -77,12 +93,12 @@ public partial class App : System.Windows.Application
     private void CreateTrayIcon()
     {
         _trayIcon = new TrayIcon();
-        _trayIcon.AddMenuItem("Show Desktop Organizer", ShowHostWindow, isBold: true);
+        _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Show"), ShowHostWindow, isBold: true);
         _trayIcon.AddSeparator();
-        _trayIcon.AddMenuItem("Settings", OpenSettingsWindow);
-        _trayIcon.AddMenuItem("Refresh Baskets", () => _desktopHostViewModel?.RefreshDesktopCommand.Execute(null));
+        _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Settings"), OpenSettingsWindow);
+        _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Refresh"), () => _desktopHostViewModel?.RefreshDesktopCommand.Execute(null));
         _trayIcon.AddSeparator();
-        _trayIcon.AddMenuItem("Exit", ShutdownGracefully);
+        _trayIcon.AddMenuItem(LocalizationService.Get("Tray.Exit"), ShutdownGracefully);
     }
 
     private void ShowHostWindow()
@@ -94,10 +110,22 @@ public partial class App : System.Windows.Application
         _hostWindow.Activate();
     }
 
-    private void ShutdownGracefully()
+    private async void ShutdownGracefully()
     {
-        _trayIcon?.Dispose();
-        _trayIcon = null;
+        _settingsWindow?.Close();
+
+        // Do a final synchronous save before shutting down
+        if (_desktopHostViewModel is not null)
+        {
+            await _desktopHostViewModel.SaveHostStateAsync();
+        }
+
+        if (_hostWindow is not null)
+        {
+            _hostWindow.PrepareForShutdown();
+            _hostWindow.Close();
+        }
+
         Shutdown();
     }
 

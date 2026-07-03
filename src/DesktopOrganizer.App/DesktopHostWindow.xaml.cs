@@ -9,6 +9,7 @@ namespace DesktopOrganizer.App;
 public partial class DesktopHostWindow : Window
 {
     private readonly IDesktopSurfaceController _desktopSurfaceController;
+    private bool _allowRealClose;
 
     public DesktopHostWindow(DesktopHostViewModel viewModel, IDesktopSurfaceController desktopSurfaceController)
     {
@@ -34,8 +35,18 @@ public partial class DesktopHostWindow : Window
         _desktopSurfaceController.AttachWindowToDesktop(handle);
     }
 
+    public void PrepareForShutdown()
+    {
+        _allowRealClose = true;
+    }
+
     private void OnClosing(object? sender, CancelEventArgs e)
     {
+        if (_allowRealClose)
+        {
+            return;
+        }
+
         // Minimize to system tray instead of closing.
         // Only "Exit" from the tray context menu truly exits.
         e.Cancel = true;

@@ -41,7 +41,7 @@
                     VerticalAlignment="Center"
                     FontSize="18"
                     FontWeight="SemiBold"
-                    Text="Desktop Organizer" />
+                    Text="{Binding Loc.HostTitle}" />
                 <TextBlock
                     Margin="12,0,12,0"
                     VerticalAlignment="Center"
@@ -54,14 +54,14 @@
                     Background="#CCD5C4A1"
                     BorderThickness="0"
                     Command="{Binding RefreshDesktopCommand}"
-                    Content="Refresh" />
+                    Content="{Binding Loc.HostRefresh}" />
                 <Button
                     Padding="10,5"
                     Background="#CCA88E5E"
                     Foreground="White"
                     BorderThickness="0"
                     Command="{Binding OpenSettingsCommand}"
-                    Content="Settings" />
+                    Content="{Binding Loc.HostSettings}" />
             </StackPanel>
         </Border>
 

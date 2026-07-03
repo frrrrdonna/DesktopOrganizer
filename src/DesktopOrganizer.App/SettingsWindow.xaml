@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Desktop Organizer Settings"
     Width="520"
-    Height="360"
+    Height="420"
     Background="#F7F3E8"
     WindowStartupLocation="CenterScreen">
     <Border Padding="20">
@@ -13,38 +13,52 @@
                 Margin="0,0,0,16"
                 FontSize="24"
                 FontWeight="Bold"
-                Text="Settings" />
+                Text="{Binding Loc.Title}" />
 
             <CheckBox
                 Margin="0,0,0,10"
-                Content="Replace desktop on startup"
+                Content="{Binding Loc.ReplaceDesktopOnStartup}"
                 IsChecked="{Binding ReplaceDesktopOnStartup}" />
 
             <CheckBox
                 Margin="0,0,0,10"
-                Content="Hide original desktop icons while host is running"
+                Content="{Binding Loc.HideDesktopIcons}"
                 IsChecked="{Binding HideDesktopIcons}" />
 
             <CheckBox
                 Margin="0,0,0,10"
-                Content="Auto-generate baskets from detected desktop content"
+                Content="{Binding Loc.AutoGenerateBaskets}"
                 IsChecked="{Binding AutoGenerateBaskets}" />
 
             <CheckBox
-                Margin="0,0,0,18"
-                Content="Restore original desktop icon visibility on exit"
+                Margin="0,0,0,10"
+                Content="{Binding Loc.RestoreDesktopOnExit}"
                 IsChecked="{Binding RestoreDesktopOnExit}" />
+
+            <!-- Language selector -->
+            <StackPanel
+                Margin="0,8,0,10"
+                Orientation="Horizontal">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0"
+                    Text="{Binding Loc.Language}" />
+                <ComboBox
+                    Width="120"
+                    ItemsSource="{Binding SupportedLanguages}"
+                    SelectedItem="{Binding SelectedLanguage}" />
+            </StackPanel>
 
             <CheckBox
                 Margin="0,0,0,18"
-                Content="Physically organize desktop files into managed folders (coming soon)"
+                Content="{Binding Loc.PhysicallyOrganize}"
                 IsEnabled="False"
                 IsChecked="False" />
 
             <TextBlock
                 Margin="0,0,0,18"
                 Foreground="#6B5A3C"
-                Text="v0.2.1 adds transparent desktop overlay, floating baskets, and safe exit recovery. Physical desktop-file relocation is intentionally deferred."
+                Text="{Binding Loc.Footer}"
                 TextWrapping="Wrap" />
 
             <Button
@@ -54,7 +68,7 @@
                 Background="#A88E5E"
                 Foreground="White"
                 BorderThickness="0"
-                Content="Close"
+                Content="{Binding Loc.Close}"
                 Click="OnCloseClicked" />
         </StackPanel>
     </Border>

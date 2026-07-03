@@ -136,3 +136,37 @@ WPF 的 `Button` 类没有 `CornerRadius` 依赖属性。该属性存在于 UWP/
 ### 未来改进方向
 
 Windows 10/11 提供 `SetWindowCompositionAttribute` API 实现真正的 Acrylic/Mica 模糊效果，性能远优于 WPF 的 `AllowsTransparency`。后续版本可考虑通过 P/Invoke 使用该 API 替代。
+---
+
+## #6 - Tray exit hidden by close-to-tray interception
+
+**Version:** v0.3.1  
+**Found:** 2026-07-03  
+**Severity:** High
+
+### Symptom
+
+When the user clicked `Exit` from the tray icon menu, Desktop Organizer appeared to exit, but desktop icons stayed hidden.
+
+### Root Cause
+
+`DesktopHostWindow.OnClosing` always canceled the close request and hid the window to tray.  
+The tray exit path called `Shutdown()`, but the host window still intercepted closing, so the normal shutdown path that restores desktop icons in `App.OnExit` could be bypassed.
+
+### Solution
+
+Add an explicit shutdown bypass:
+
+1. `DesktopHostWindow` exposes `PrepareForShutdown()`.
+2. `PrepareForShutdown()` sets an internal flag allowing the next close request through.
+3. `App.ShutdownGracefully()` closes settings, marks the host window for real shutdown, closes it, and then exits the application.
+
+### Key Files
+
+- `src/DesktopOrganizer.App/DesktopHostWindow.xaml.cs`
+- `src/DesktopOrganizer.App/App.xaml.cs`
+- `AGENT.md`
+
+### Lesson
+
+Any tray-based exit path must bypass close-to-tray interception explicitly, otherwise cleanup code like desktop-state restore may never run.
